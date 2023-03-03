@@ -150,6 +150,7 @@ def chat(msg, sessionid):
         # 获得对话session
         session = get_chat_session(sessionid)
         if '重置会话' == msg.strip():
+            # print(session)
             # 清除对话内容但保留人设
             del session['msg'][1:len(session['msg'])]
             return "会话已重置"
@@ -198,6 +199,7 @@ def chat_with_gpt(messages):
             return "请设置Api Key"
         else:
             openai.api_key = config_data['openai']['api_key']
+        
         resp = openai.ChatCompletion.create(
             model=config_data['chatgpt']['model'],
             messages=messages
@@ -205,7 +207,13 @@ def chat_with_gpt(messages):
         resp = resp['choices'][0]['message']['content']
     except openai.OpenAIError as e:
         print('openai 接口报错: ' + str(e))
-        resp = str(e)
+        resp='Please try again! Restart the chat!'
+        messages = [
+                {"role": "system", "content": config_data['chatgpt']['preset']}
+            ]
+        # session=
+        # del session['msg'][1:len(session['msg'])]
+        # resp = str(e)
     return resp
 
 
