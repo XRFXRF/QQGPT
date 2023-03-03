@@ -1,0 +1,5 @@
+creart
+Flask
+openai
+Pillow
+requests
