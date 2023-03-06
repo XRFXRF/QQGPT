@@ -172,9 +172,10 @@ def chat(msg, sessionid):
         # 设置本次对话内容
         session['msg'].append({"role": "user", "content": msg})
         # 与ChatGPT交互获得对话内容
-        message = chat_with_gpt(session['msg'])
+        message = chat_with_gpt(session)
         # 记录上下文
-        session['msg'].append({"role": "assistant", "content": message})
+        if not message.startswith('Please try again!'):
+            session['msg'].append({"role": "assistant", "content": message})
         print("会话ID: " + str(sessionid))
         print("ChatGPT返回内容: ")
         print(message)
@@ -193,7 +194,7 @@ def get_chat_session(sessionid):
     return sessions[sessionid]
 
 
-def chat_with_gpt(messages):
+def chat_with_gpt(session):
     try:
         if not config_data['openai']['api_key']:
             return "请设置Api Key"
@@ -202,13 +203,14 @@ def chat_with_gpt(messages):
         
         resp = openai.ChatCompletion.create(
             model=config_data['chatgpt']['model'],
-            messages=messages
+            messages=session['msg']
         )
         resp = resp['choices'][0]['message']['content']
     except openai.OpenAIError as e:
         print('openai 接口报错: ' + str(e))
         resp='Please try again! Restart the chat!'
-        messages = [
+        print(session['msg'])
+        session['msg'] = [
                 {"role": "system", "content": config_data['chatgpt']['preset']}
             ]
         # session=
